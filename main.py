@@ -22,9 +22,11 @@ class ClassifierResource(Resource):
         hr = None
         if 'hr' in req_body:
             hr = np.asarray(req_body['hr'])
+        emotion, additional = classifier.classify(np.asarray(req_body['rr']), hr)
         response = app.response_class(
             response=json.dumps({
-                'emotion': classifier.classify(np.asarray(req_body['rr']), hr)
+                'emotion': emotion,
+                'additional': json.dumps(additional)
             }),
             status=200,
             mimetype='application/json'

@@ -17,11 +17,12 @@ class EmotionClassifier:
         self.classifier = load(model_path)
 
     def classify(self, rr, hrdata=None):
-        row = [self.transform_into_feature_row(rr, hrdata)]
+        attrs, r = self.transform_into_feature_row(rr, hrdata)
+        row = [r]
         scaled = row
         if self.preprocessor is not None:
             scaled = self.preprocessor.transform(scaled)
-        return self.classifier.predict(scaled)[0]
+        return self.classifier.predict(scaled)[0], attrs
 
     def transform_into_feature_row(self, rr, hrdata=None):
         hr = hrdata
@@ -39,8 +40,6 @@ class EmotionClassifier:
         rr_below_mean_minus_std = rr[np.where(rr < mean_rr - std_rr)]
 
         attrs = {
-            #     'filtered_indexes': filtered_indices,
-            'rr': rr,
             'mean_hr': mean_hr,
             'min_hr': hr.min(),
             'max_hr': hr.max(),
@@ -75,7 +74,7 @@ class EmotionClassifier:
                         attrs['rmssd'], attrs['sdsd'], attrs['pnn20'], attrs['pnn50'], attrs['sd1'], attrs['sd2'],
                         attrs['sd2_sd1_ratio'], attrs['lf'], attrs['hf'], attrs['lfhf']]
 
-        return attrs_as_row
+        return attrs, attrs_as_row
 
     def extract_frequent_domain_features(self, rr):
         rr_in_ms = rr * 1000
